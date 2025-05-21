@@ -1,0 +1,18 @@
+<h2>Nueva Reserva</h2>
+<form action="/reservas/add" method="POST">
+  <label>Dispositivo:</label>
+  <select name="dispositivo" required>
+    <% dispositivos.forEach(d => { %>
+      <option value="<%= d.id %>"><%= d.id %> - <%= d.tipo %></option>
+    <% }) %>
+  </select>
+
+  <label>Hora de salida:</label>
+  <input type="time" name="salida" required>
+
+  <label>Hora de regreso:</label>
+  <input type="time" name="regreso" required>
+
+  <button type="submit">Reservar</button>
+</form>
+<a href="/reservas">Volver a reservas</a>

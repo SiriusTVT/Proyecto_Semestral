@@ -1,0 +1,31 @@
+<h2>Reservas</h2>
+<a href="/reservas/add">Crear Nueva Reserva</a>
+<br><br>
+<table>
+  <tr>
+    <th>ID</th>
+    <th>Dispositivo</th>
+    <th>Salida</th>
+    <th>Regreso</th>
+    <th>Estado</th>
+    <th>Acción</th>
+  </tr>
+  <% reservas.forEach(r => { %>
+    <tr>
+      <td><%= r.id %></td>
+      <td><%= r.dispositivo %></td>
+      <td><%= r.salida %></td>
+      <td><%= r.regreso %></td>
+      <td><%= r.estado %></td>
+      <td>
+        <% if (r.estado === 'En curso') { %>
+          <form action="/reservas/finalizar/<%= r.id %>" method="POST">
+            <button type="submit">Finalizar</button>
+          </form>
+        <% } else { %>
+          -
+        <% } %>
+      </td>
+    </tr>
+  <% }) %>
+</table>

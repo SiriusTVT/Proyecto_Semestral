@@ -1,15 +1,19 @@
 <h1>Panel de Monitoreo</h1>
+<a href="/devices/add?id=R3&tipo=Robot&bateria=100%">Agregar R3</a>
+<br><br>
 <table border="1">
   <tr>
     <th>ID</th>
     <th>Tipo</th>
     <th>Batería</th>
+    <th>Acciones</th>
   </tr>
   <% dispositivos.forEach(d => { %>
   <tr>
     <td><%= d.id %></td>
     <td><%= d.tipo %></td>
     <td><%= d.bateria %></td>
+    <td><a href="/devices/delete/<%= d.id %>">Eliminar</a></td>
   </tr>
   <% }) %>
 </table>
