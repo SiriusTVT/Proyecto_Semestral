@@ -1,27 +1,15 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <title>Panel de Dispositivos</title>
-  <link rel="stylesheet" href="/styles.css">
-</head>
-<body>
-  <h1>Panel de Monitoreo</h1>
-  <table border="1">
-    <tr>
-      <th>ID</th>
-      <th>Tipo</th>
-      <th>Estado</th>
-      <th>Batería</th>
-    </tr>
-    <% dispositivos.forEach(d => { %>
-    <tr>
-      <td><%= d.id %></td>
-      <td><%= d.tipo %></td>
-      <td><%= d.estado %></td>
-      <td><%= d.bateria %>%</td>
-    </tr>
-    <% }) %>
-  </table>
-</body>
-</html>
+<h1>Panel de Monitoreo</h1>
+<table border="1">
+  <tr>
+    <th>ID</th>
+    <th>Tipo</th>
+    <th>Batería</th>
+  </tr>
+  <% dispositivos.forEach(d => { %>
+  <tr>
+    <td><%= d.id %></td>
+    <td><%= d.tipo %></td>
+    <td><%= d.bateria %></td>
+  </tr>
+  <% }) %>
+</table>

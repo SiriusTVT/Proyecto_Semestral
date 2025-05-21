@@ -1,21 +1,26 @@
 const express = require('express');
 const app = express();
 const path = require('path');
-require('dotenv').config();
+const expressLayouts = require('express-ejs-layouts');
 
-app.use(express.static('public'));
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
+// Middlewares
+app.use(express.static(path.join(__dirname, 'public')));
 app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
+app.use(expressLayouts);
 
-const indexRoutes = require('./routes/index');
-const deviceRoutes = require('./routes/devices');
-const serviceRoutes = require('./routes/services');
+// Rutas
+app.get('/', (req, res) => {
+  const dispositivos = [
+    { id: 'R1', tipo: 'Robot', bateria: '85%' },
+    { id: 'D1', tipo: 'Drone', bateria: '70%' },
+    { id: 'R2', tipo: 'Robot', bateria: '92%' },
+  ];
+  res.render('dashboard', { dispositivos, title: 'Panel de Monitoreo' });
+});
 
-
-app.use('/', indexRoutes);
-app.use('/devices', deviceRoutes);
-app.use('/services', serviceRoutes);
-
+// Puerto
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Servidor corriendo en http://localhost:${PORT}`));
+app.listen(PORT, () => {
+  console.log(`Servidor corriendo en http://localhost:${PORT}`);
+});
