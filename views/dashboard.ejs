@@ -1,19 +1,22 @@
 <h1>Panel de Monitoreo</h1>
-<a href="/devices/add?id=R3&tipo=Robot&bateria=100%">Agregar R3</a>
-<br><br>
+<a href="/devices/add">Agregar Dispositivo</a>
 <table border="1">
   <tr>
     <th>ID</th>
     <th>Tipo</th>
     <th>Batería</th>
+    <th>Estado</th>
+    <th>Ubicación</th>
     <th>Acciones</th>
   </tr>
   <% dispositivos.forEach(d => { %>
-  <tr>
-    <td><%= d.id %></td>
-    <td><%= d.tipo %></td>
-    <td><%= d.bateria %></td>
-    <td><a href="/devices/delete/<%= d.id %>">Eliminar</a></td>
-  </tr>
+    <tr>
+      <td><%= d.id %></td>
+      <td><%= d.tipo %></td>
+      <td><%= d.bateria %>%</td>
+      <td><%= d.estado %></td>
+      <td><%= d.ubicacion.lat %>, <%= d.ubicacion.lon %></td>
+      <td><a href="/devices/delete/<%= d.id %>" onclick="return confirm('¿Eliminar este dispositivo?')">Eliminar</a></td>
+    </tr>
   <% }) %>
 </table>

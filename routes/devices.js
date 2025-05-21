@@ -1,29 +1,56 @@
 const express = require('express');
 const router = express.Router();
+const Device = require('../models/Device');
 
-// Datos simulados temporalmente
-let dispositivos = [
-  { id: 'R1', tipo: 'Robot', bateria: '85%' },
-  { id: 'D1', tipo: 'Drone', bateria: '70%' },
-];
-
-// Mostrar todos los dispositivos
-router.get('/', (req, res) => {
-  res.render('dashboard', { dispositivos, title: 'Panel de Monitoreo' });
+// Mostrar todos los dispositivos (redirige a dashboard principal, opcional)
+router.get('/', async (req, res) => {
+  try {
+    const dispositivos = await Device.find();
+    res.render('dashboard', { dispositivos, title: 'Panel de Monitoreo' });
+  } catch (err) {
+    res.status(500).send('Error obteniendo dispositivos');
+  }
 });
 
-// Agregar un nuevo dispositivo (temporal con query)
+// Formulario para agregar un nuevo dispositivo
 router.get('/add', (req, res) => {
-  const { id, tipo, bateria } = req.query;
-  dispositivos.push({ id, tipo, bateria });
-  res.redirect('/devices');
+  res.render('device_add', { title: 'Agregar Dispositivo' });
+});
+
+// Agregar un nuevo dispositivo (POST)
+router.post('/add', async (req, res) => {
+  const { id, tipo, bateria, estado, gps, camara, motor, lat, lon } = req.body;
+  try {
+    await Device.create({
+      id,
+      tipo,
+      bateria,
+      estado: estado || 'disponible',
+      sensores: {
+        gps: gps === 'on',
+        camara: camara === 'on',
+        motor: motor === 'on'
+      },
+      ubicacion: {
+        lat,
+        lon
+      }
+    });
+    res.redirect('/devices');
+  } catch (err) {
+    res.status(400).send('Error agregando dispositivo');
+  }
 });
 
 // Eliminar dispositivo por ID
-router.get('/delete/:id', (req, res) => {
+router.get('/delete/:id', async (req, res) => {
   const { id } = req.params;
-  dispositivos = dispositivos.filter(d => d.id !== id);
-  res.redirect('/devices');
+  try {
+    await Device.deleteOne({ id });
+    res.redirect('/devices');
+  } catch (err) {
+    res.status(400).send('Error eliminando dispositivo');
+  }
 });
 
 module.exports = router;

@@ -1,0 +1,29 @@
+<h2>Agregar Dispositivo</h2>
+<form action="/devices/add" method="POST">
+  <label>ID:</label>
+  <input type="text" name="id" required><br>
+  <label>Tipo:</label>
+  <select name="tipo" required>
+    <option value="robot">Robot</option>
+    <option value="dron">Dron</option>
+  </select><br>
+  <label>Batería (%):</label>
+  <input type="number" name="bateria" min="0" max="100" required><br>
+  <label>Estado:</label>
+  <select name="estado">
+    <option value="disponible">Disponible</option>
+    <option value="en servicio">En servicio</option>
+    <option value="mantenimiento">Mantenimiento</option>
+  </select><br>
+  <fieldset>
+    <legend>Sensores</legend>
+    <label><input type="checkbox" name="gps"> GPS</label>
+    <label><input type="checkbox" name="camara"> Cámara</label>
+    <label><input type="checkbox" name="motor"> Motor</label>
+  </fieldset>
+  <label>Ubicación (lat, lon):</label>
+  <input type="number" step="any" name="lat" required>
+  <input type="number" step="any" name="lon" required><br>
+  <button type="submit">Agregar</button>
+</form>
+<a href="/devices">Volver a dispositivos</a>
