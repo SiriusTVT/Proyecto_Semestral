@@ -4,6 +4,7 @@ const path = require('path');
 const expressLayouts = require('express-ejs-layouts');
 const deviceRoutes = require('./routes/devices');
 const reservasRoutes = require('./routes/reservas');
+const usuariosRoutes = require('./routes/usuarios');
 const mongoose = require('mongoose');
 const Device = require('./models/Device'); // Asegúrate de que la ruta sea correcta
 
@@ -22,6 +23,7 @@ app.use(expressLayouts);
 app.use(express.urlencoded({ extended: true }));
 app.use('/devices', deviceRoutes);
 app.use('/reservas', reservasRoutes);
+app.use('/usuarios', usuariosRoutes);
 
 // Rutas
 app.get('/', async (req, res) => {

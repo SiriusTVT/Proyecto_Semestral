@@ -1,58 +1,59 @@
 const express = require('express');
 const router = express.Router();
+const Reserva = require('../models/Reserva');
+const Device = require('../models/Device');
 
-// Simulamos que importamos dispositivos desde otro módulo (o usa un array local)
-const dispositivos = [
-  { id: 'R1', tipo: 'Robot', estado: 'Disponible' },
-  { id: 'D1', tipo: 'Drone', estado: 'En servicio' },
-  { id: 'R2', tipo: 'Robot', estado: 'Disponible' }
-];
-
-// Lista de reservas
-let reservas = [];
-
-// Ver todas las reservas
-router.get('/', (req, res) => {
+// GET /reservas → Lista todas las reservas
+router.get('/', async (req, res) => {
+  const reservas = await Reserva.find().populate('dispositivoId');
   res.render('reservas', { reservas, title: 'Reservas' });
 });
 
-// Ruta GET para mostrar formulario con dispositivos disponibles
-router.get('/add', (req, res) => {
-  // Filtramos solo los dispositivos disponibles
-  const disponibles = dispositivos.filter(d => d.estado === 'Disponible');
-  res.render('reserva_add', { dispositivos: disponibles });
+// GET /reservas/nueva → Formulario para nueva reserva
+router.get('/nueva', async (req, res) => {
+  const dispositivos = await Device.find({ estado: 'disponible' });
+  res.render('reserva_add', { dispositivos, title: 'Nueva Reserva' });
 });
 
-// Modificar POST para validar dispositivo disponible
-router.post('/add', (req, res) => {
-  const { dispositivo, salida, regreso } = req.body;
-
-  // Validar que el dispositivo esté disponible
-  const dispo = dispositivos.find(d => d.id === dispositivo);
-  if (!dispo || dispo.estado !== 'Disponible') {
-    return res.status(400).send('Dispositivo no disponible');
+// POST /reservas → Crear reserva
+router.post('/', async (req, res) => {
+  const { dispositivoId, fechaInicio, fechaFin, tipoServicio, usuarioId } = req.body;
+  try {
+    await Reserva.create({ dispositivoId, usuarioId, fechaInicio, fechaFin, tipoServicio });
+    // Cambia el estado del dispositivo a "en servicio"
+    await Device.findByIdAndUpdate(dispositivoId, { estado: 'en servicio' });
+    res.redirect('/reservas');
+  } catch (err) {
+    res.status(400).send('Error creando reserva');
   }
-
-  // Cambiar estado a 'En servicio'
-  dispo.estado = 'En servicio';
-
-  const id = reservas.length + 1;
-  reservas.push({ id, dispositivo, salida, regreso, estado: 'En curso' });
-  res.redirect('/reservas');
 });
 
-// Al finalizar reserva cambiar estado dispositivo
-router.post('/finalizar/:id', (req, res) => {
-  const { id } = req.params;
-  const reserva = reservas.find(r => r.id == id);
-  if (reserva) {
-    reserva.estado = 'Finalizado';
+// GET /reservas/:id/editar → Formulario para editar reserva
+router.get('/:id/editar', async (req, res) => {
+  const reserva = await Reserva.findById(req.params.id);
+  const dispositivos = await Device.find();
+  res.render('reserva_edit', { reserva, dispositivos, title: 'Editar Reserva' });
+});
 
-    // Liberar dispositivo
-    const dispo = dispositivos.find(d => d.id === reserva.dispositivo);
-    if (dispo) dispo.estado = 'Disponible';
+// POST /reservas/:id → Actualizar reserva
+router.post('/:id', async (req, res) => {
+  const { dispositivoId, fechaInicio, fechaFin, tipoServicio, usuarioId, estado } = req.body;
+  try {
+    await Reserva.findByIdAndUpdate(req.params.id, { dispositivoId, usuarioId, fechaInicio, fechaFin, tipoServicio, estado });
+    res.redirect('/reservas');
+  } catch (err) {
+    res.status(400).send('Error actualizando reserva');
   }
-  res.redirect('/reservas');
+});
+
+// POST /reservas/:id/cancelar → Cancelar reserva
+router.post('/:id/cancelar', async (req, res) => {
+  try {
+    await Reserva.findByIdAndUpdate(req.params.id, { estado: 'cancelado' });
+    res.redirect('/reservas');
+  } catch (err) {
+    res.status(400).send('Error cancelando reserva');
+  }
 });
 
 module.exports = router;

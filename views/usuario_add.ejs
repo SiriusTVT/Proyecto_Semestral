@@ -1,0 +1,14 @@
+<h2>Crear Usuario</h2>
+<form action="/usuarios" method="POST">
+  <label>Nombre:</label>
+  <input type="text" name="nombre" required><br>
+  <label>Email:</label>
+  <input type="email" name="email" required><br>
+  <label>Rol:</label>
+  <select name="rol" required>
+    <option value="operador">Operador</option>
+    <option value="admin">Administrador</option>
+  </select><br>
+  <button type="submit">Crear Usuario</button>
+</form>
+<a href="/">Volver al inicio</a>

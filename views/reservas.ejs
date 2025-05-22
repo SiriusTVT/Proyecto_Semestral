@@ -1,29 +1,57 @@
 <h2>Reservas</h2>
-<a href="/reservas/add">Crear Nueva Reserva</a>
+<a href="/reservas/nueva">Crear Nueva Reserva</a>
 <br><br>
-<table>
+<form method="GET" action="/reservas">
+  <label>Dispositivo:</label>
+  <select name="dispositivoId">
+    <option value="">Todos</option>
+    <% dispositivos.forEach(d => { %>
+      <option value="<%= d._id %>" <%= filtroDispositivo == d._id ? 'selected' : '' %>><%= d.id %></option>
+    <% }) %>
+  </select>
+  <label>Usuario:</label>
+  <select name="usuarioId">
+    <option value="">Todos</option>
+    <% usuarios.forEach(u => { %>
+      <option value="<%= u._id %>" <%= filtroUsuario == u._id ? 'selected' : '' %>><%= u.nombre %></option>
+    <% }) %>
+  </select>
+  <label>Estado:</label>
+  <select name="estado">
+    <option value="">Todos</option>
+    <option value="activo" <%= filtroEstado == 'activo' ? 'selected' : '' %>>Activo</option>
+    <option value="cancelado" <%= filtroEstado == 'cancelado' ? 'selected' : '' %>>Cancelado</option>
+    <option value="completado" <%= filtroEstado == 'completado' ? 'selected' : '' %>>Completado</option>
+  </select>
+  <button type="submit">Filtrar</button>
+</form>
+<br>
+<table border="1">
   <tr>
     <th>ID</th>
     <th>Dispositivo</th>
-    <th>Salida</th>
-    <th>Regreso</th>
+    <th>Usuario</th>
+    <th>Inicio</th>
+    <th>Fin</th>
+    <th>Tipo Servicio</th>
     <th>Estado</th>
-    <th>Acción</th>
+    <th>Acciones</th>
   </tr>
   <% reservas.forEach(r => { %>
     <tr>
-      <td><%= r.id %></td>
-      <td><%= r.dispositivo %></td>
-      <td><%= r.salida %></td>
-      <td><%= r.regreso %></td>
+      <td><%= r._id %></td>
+      <td><%= r.dispositivoId && r.dispositivoId.id ? r.dispositivoId.id : '' %></td>
+      <td><%= r.usuarioId || '-' %></td>
+      <td><%= r.fechaInicio ? r.fechaInicio.toLocaleString() : '' %></td>
+      <td><%= r.fechaFin ? r.fechaFin.toLocaleString() : '' %></td>
+      <td><%= r.tipoServicio %></td>
       <td><%= r.estado %></td>
       <td>
-        <% if (r.estado === 'En curso') { %>
-          <form action="/reservas/finalizar/<%= r.id %>" method="POST">
-            <button type="submit">Finalizar</button>
-          </form>
-        <% } else { %>
-          -
+        <a href="/reservas/<%= r._id %>/editar">Editar</a>
+        <% if(r.estado !== 'cancelado'){ %>
+        <form action="/reservas/<%= r._id %>/cancelar" method="POST" style="display:inline;">
+          <button type="submit">Cancelar</button>
+        </form>
         <% } %>
       </td>
     </tr>

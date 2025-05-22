@@ -1,0 +1,20 @@
+<h2>Usuarios</h2>
+<a href="/usuarios/nuevo">Crear Usuario</a>
+<br><br>
+<table border="1">
+  <tr>
+    <th>ID</th>
+    <th>Nombre</th>
+    <th>Email</th>
+    <th>Rol</th>
+  </tr>
+  <% usuarios.forEach(u => { %>
+    <tr>
+      <td><%= u._id %></td>
+      <td><%= u.nombre %></td>
+      <td><%= u.email %></td>
+      <td><%= u.rol %></td>
+    </tr>
+  <% }) %>
+</table>
+<a href="/">Volver al inicio</a>

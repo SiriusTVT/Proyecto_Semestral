@@ -1,18 +1,45 @@
 <h2>Nueva Reserva</h2>
-<form action="/reservas/add" method="POST">
+<form action="/reservas" method="POST" id="formReserva">
   <label>Dispositivo:</label>
-  <select name="dispositivo" required>
+  <select name="dispositivoId" id="dispositivoId" required>
     <% dispositivos.forEach(d => { %>
-      <option value="<%= d.id %>"><%= d.id %> - <%= d.tipo %></option>
+      <option value="<%= d._id %>"><%= d.id %> - <%= d.tipo %></option>
     <% }) %>
-  </select>
-
-  <label>Hora de salida:</label>
-  <input type="time" name="salida" required>
-
-  <label>Hora de regreso:</label>
-  <input type="time" name="regreso" required>
-
-  <button type="submit">Reservar</button>
+  </select><br>
+  <label>Usuario:</label>
+  <select name="usuarioId" required>
+    <% usuarios.forEach(u => { %>
+      <option value="<%= u._id %>"><%= u.nombre %></option>
+    <% }) %>
+  </select><br>
+  <label>Fecha Inicio:</label>
+  <input type="datetime-local" name="fechaInicio" id="fechaInicio" required><br>
+  <label>Fecha Fin:</label>
+  <input type="datetime-local" name="fechaFin" id="fechaFin" required><br>
+  <label>Tipo de Servicio:</label>
+  <select name="tipoServicio" required>
+    <option value="transporte">Transporte</option>
+    <option value="grabacion">Grabación</option>
+  </select><br>
+  <button type="submit">Crear Reserva</button>
 </form>
 <a href="/reservas">Volver a reservas</a>
+<script>
+// Validación de solapamiento de fechas en el front-end
+var reservas = <%= JSON.stringify(reservasExistentes || []) %>;
+document.getElementById('formReserva').addEventListener('submit', function(e) {
+  var dispositivoId = document.getElementById('dispositivoId').value;
+  var inicio = new Date(document.getElementById('fechaInicio').value);
+  var fin = new Date(document.getElementById('fechaFin').value);
+  var solapa = reservas.some(function(r) {
+    return r.dispositivoId == dispositivoId &&
+      ((inicio >= new Date(r.fechaInicio) && inicio < new Date(r.fechaFin)) ||
+       (fin > new Date(r.fechaInicio) && fin <= new Date(r.fechaFin)) ||
+       (inicio <= new Date(r.fechaInicio) && fin >= new Date(r.fechaFin)));
+  });
+  if (solapa) {
+    alert('Ya existe una reserva para ese dispositivo en el rango de fechas seleccionado.');
+    e.preventDefault();
+  }
+});
+</script>

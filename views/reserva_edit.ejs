@@ -1,0 +1,28 @@
+<h2>Editar Reserva</h2>
+<form action="/reservas/<%= reserva._id %>" method="POST">
+  <label>Dispositivo:</label>
+  <select name="dispositivoId" required>
+    <% dispositivos.forEach(d => { %>
+      <option value="<%= d._id %>" <%= reserva.dispositivoId.equals(d._id) ? 'selected' : '' %>><%= d.id %> - <%= d.tipo %></option>
+    <% }) %>
+  </select><br>
+  <label>Usuario (ID):</label>
+  <input type="text" name="usuarioId" value="<%= reserva.usuarioId %>" required><br>
+  <label>Fecha Inicio:</label>
+  <input type="datetime-local" name="fechaInicio" value="<%= reserva.fechaInicio ? reserva.fechaInicio.toISOString().slice(0,16) : '' %>" required><br>
+  <label>Fecha Fin:</label>
+  <input type="datetime-local" name="fechaFin" value="<%= reserva.fechaFin ? reserva.fechaFin.toISOString().slice(0,16) : '' %>" required><br>
+  <label>Tipo de Servicio:</label>
+  <select name="tipoServicio" required>
+    <option value="transporte" <%= reserva.tipoServicio === 'transporte' ? 'selected' : '' %>>Transporte</option>
+    <option value="grabacion" <%= reserva.tipoServicio === 'grabacion' ? 'selected' : '' %>>Grabación</option>
+  </select><br>
+  <label>Estado:</label>
+  <select name="estado">
+    <option value="activo" <%= reserva.estado === 'activo' ? 'selected' : '' %>>Activo</option>
+    <option value="cancelado" <%= reserva.estado === 'cancelado' ? 'selected' : '' %>>Cancelado</option>
+    <option value="completado" <%= reserva.estado === 'completado' ? 'selected' : '' %>>Completado</option>
+  </select><br>
+  <button type="submit">Actualizar Reserva</button>
+</form>
+<a href="/reservas">Volver a reservas</a>
