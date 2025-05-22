@@ -5,8 +5,23 @@ const Device = require('../models/Device');
 
 // GET /reservas → Lista todas las reservas
 router.get('/', async (req, res) => {
-  const reservas = await Reserva.find().populate('dispositivoId');
-  res.render('reservas', { reservas, title: 'Reservas' });
+  const filtro = {};
+  const { dispositivoId, usuarioId, estado } = req.query;
+  if (dispositivoId) filtro.dispositivoId = dispositivoId;
+  if (usuarioId) filtro.usuarioId = usuarioId;
+  if (estado) filtro.estado = estado;
+  const reservas = await Reserva.find(filtro).populate('dispositivoId');
+  const dispositivos = await Device.find();
+  const usuarios = await require('../models/Usuario').find();
+  res.render('reservas', {
+    reservas,
+    dispositivos,
+    usuarios,
+    filtroDispositivo: dispositivoId || '',
+    filtroUsuario: usuarioId || '',
+    filtroEstado: estado || '',
+    title: 'Reservas'
+  });
 });
 
 // GET /reservas/nueva → Formulario para nueva reserva
@@ -19,6 +34,22 @@ router.get('/nueva', async (req, res) => {
 router.post('/', async (req, res) => {
   const { dispositivoId, fechaInicio, fechaFin, tipoServicio, usuarioId } = req.body;
   try {
+    // Validación de fechas
+    if (!fechaInicio || !fechaFin || new Date(fechaFin) <= new Date(fechaInicio)) {
+      return res.status(400).send('Fechas inválidas');
+    }
+    // Validar solapamiento de reservas activas para el dispositivo
+    const solapada = await Reserva.findOne({
+      dispositivoId,
+      estado: { $in: ['activo', 'completado'] },
+      $or: [
+        { fechaInicio: { $lt: fechaFin }, fechaFin: { $gt: fechaInicio } }
+      ]
+    });
+    if (solapada) {
+      return res.status(400).send('El dispositivo ya tiene una reserva activa en ese rango de fechas');
+    }
+    // (Opcional) Validar penalidades de usuario aquí
     await Reserva.create({ dispositivoId, usuarioId, fechaInicio, fechaFin, tipoServicio });
     // Cambia el estado del dispositivo a "en servicio"
     await Device.findByIdAndUpdate(dispositivoId, { estado: 'en servicio' });
