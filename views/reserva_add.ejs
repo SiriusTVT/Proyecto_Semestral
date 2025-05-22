@@ -33,6 +33,14 @@
     <option value="transporte" <%= typeof tipoServicio !== 'undefined' && tipoServicio === 'transporte' ? 'selected' : '' %>>Transporte</option>
     <option value="grabacion" <%= typeof tipoServicio !== 'undefined' && tipoServicio === 'grabacion' ? 'selected' : '' %>>Grabación</option>
   </select><br>
+  <label>Peso del paquete (kg):</label>
+  <input type="number" name="pesoPaquete" min="0.1" step="0.1" value="<%= typeof pesoPaquete !== 'undefined' ? pesoPaquete : '' %>" required><br>
+  <label>Largo del paquete (cm):</label>
+  <input type="number" name="largoPaquete" min="1" step="1" value="<%= typeof largoPaquete !== 'undefined' ? largoPaquete : '' %>" required><br>
+  <label>Ancho del paquete (cm):</label>
+  <input type="number" name="anchoPaquete" min="1" step="1" value="<%= typeof anchoPaquete !== 'undefined' ? anchoPaquete : '' %>" required><br>
+  <label>Alto del paquete (cm):</label>
+  <input type="number" name="altoPaquete" min="1" step="1" value="<%= typeof altoPaquete !== 'undefined' ? altoPaquete : '' %>" required><br>
   <button type="submit">Crear Reserva</button>
 </form>
 <a href="/reservas">Volver a reservas</a>

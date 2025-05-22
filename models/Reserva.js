@@ -12,7 +12,11 @@ const reservaSchema = new mongoose.Schema({
     email: String
   },
   origen: { type: String, required: true },
-  destino: { type: String, required: true }
+  destino: { type: String, required: true },
+  pesoPaquete: { type: Number, required: true },
+  largoPaquete: { type: Number, required: true },
+  anchoPaquete: { type: Number, required: true },
+  altoPaquete: { type: Number, required: true }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Reserva', reservaSchema);

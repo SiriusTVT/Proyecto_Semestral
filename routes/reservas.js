@@ -40,7 +40,7 @@ router.get('/nueva', async (req, res) => {
 
 // POST /reservas → Crear reserva
 router.post('/', async (req, res) => {
-  const { dispositivoId, fechaInicio, fechaFin, tipoServicio, nombre, numero, email, origen, destino } = req.body;
+  const { dispositivoId, fechaInicio, fechaFin, tipoServicio, nombre, numero, email, origen, destino, pesoPaquete, largoPaquete, anchoPaquete, altoPaquete } = req.body;
   try {
     // Validación de fechas
     if (!fechaInicio || !fechaFin || new Date(fechaFin) <= new Date(fechaInicio)) {
@@ -69,6 +69,13 @@ router.post('/', async (req, res) => {
       if (!dispositivo.sensores || !dispositivo.sensores.motor) errores.push('Motor no disponible.');
       // Solo bloquear si está en mantenimiento
       if (dispositivo.estado === 'mantenimiento') errores.push('El dispositivo está en mantenimiento.');
+      // Validar peso y dimensiones
+      if (dispositivo.capacidad) {
+        if (Number(pesoPaquete) > dispositivo.capacidad.pesoMax) errores.push('El peso del paquete excede la capacidad máxima del dispositivo.');
+        if (Number(largoPaquete) > dispositivo.capacidad.largoMax) errores.push('El largo del paquete excede la capacidad máxima del dispositivo.');
+        if (Number(anchoPaquete) > dispositivo.capacidad.anchoMax) errores.push('El ancho del paquete excede la capacidad máxima del dispositivo.');
+        if (Number(altoPaquete) > dispositivo.capacidad.altoMax) errores.push('El alto del paquete excede la capacidad máxima del dispositivo.');
+      }
     }
     if (errores.length > 0) {
       // Reutiliza las variables ya obtenidas en el GET /nueva
@@ -85,11 +92,15 @@ router.post('/', async (req, res) => {
         fechaInicio,
         fechaFin,
         tipoServicio,
-        dispositivoId
+        dispositivoId,
+        pesoPaquete,
+        largoPaquete,
+        anchoPaquete,
+        altoPaquete
       });
     }
     // Guardar los datos del usuario no autenticado en la reserva
-    const reserva = await Reserva.create({ dispositivoId, fechaInicio, fechaFin, tipoServicio, datosContacto: { nombre, numero, email }, origen, destino });
+    const reserva = await Reserva.create({ dispositivoId, fechaInicio, fechaFin, tipoServicio, datosContacto: { nombre, numero, email }, origen, destino, pesoPaquete, largoPaquete, anchoPaquete, altoPaquete });
     // Cambia el estado del dispositivo a "en servicio"
     await Device.findByIdAndUpdate(dispositivoId, { estado: 'en servicio' });
     // Registrar en bitácora
@@ -117,8 +128,61 @@ router.get('/:id/editar', async (req, res) => {
 
 // POST /reservas/:id → Actualizar reserva
 router.post('/:id', async (req, res) => {
-  const { dispositivoId, fechaInicio, fechaFin, tipoServicio, estado, nombre, numero, email, origen, destino } = req.body;
+  const { dispositivoId, fechaInicio, fechaFin, tipoServicio, estado, nombre, numero, email, origen, destino, pesoPaquete, largoPaquete, anchoPaquete, altoPaquete } = req.body;
   try {
+    // Validación de fechas
+    if (!fechaInicio || !fechaFin || new Date(fechaFin) <= new Date(fechaInicio)) {
+      return res.status(400).send('Fechas inválidas');
+    }
+    // Validar solapamiento de reservas activas para el dispositivo
+    const solapada = await Reserva.findOne({
+      dispositivoId,
+      estado: { $in: ['activo', 'completado'] },
+      $or: [
+        { fechaInicio: { $lt: fechaFin }, fechaFin: { $gt: fechaInicio } }
+      ]
+    });
+    if (solapada && estado === 'activo') {
+      return res.status(400).send('El dispositivo ya tiene una reserva activa en ese rango de fechas');
+    }
+    // Verificar estado del dispositivo antes de actualizar la reserva
+    const dispositivo = await Device.findById(dispositivoId);
+    let errores = [];
+    if (!dispositivo) {
+      errores.push('Dispositivo no encontrado.');
+    } else {
+      if (dispositivo.bateria < 30) errores.push('Nivel de batería insuficiente (< 30%).');
+      if (!dispositivo.sensores || !dispositivo.sensores.gps) errores.push('GPS no disponible.');
+      if (!dispositivo.sensores || !dispositivo.sensores.camara) errores.push('Cámara no disponible.');
+      if (!dispositivo.sensores || !dispositivo.sensores.motor) errores.push('Motor no disponible.');
+      if (dispositivo.estado === 'mantenimiento') errores.push('El dispositivo está en mantenimiento.');
+      // Validar peso y dimensiones
+      if (dispositivo.capacidad) {
+        if (Number(pesoPaquete) > dispositivo.capacidad.pesoMax) errores.push('El peso del paquete excede la capacidad máxima del dispositivo.');
+        if (Number(largoPaquete) > dispositivo.capacidad.largoMax) errores.push('El largo del paquete excede la capacidad máxima del dispositivo.');
+        if (Number(anchoPaquete) > dispositivo.capacidad.anchoMax) errores.push('El ancho del paquete excede la capacidad máxima del dispositivo.');
+        if (Number(altoPaquete) > dispositivo.capacidad.altoMax) errores.push('El alto del paquete excede la capacidad máxima del dispositivo.');
+      }
+    }
+    if (errores.length > 0) {
+      // Reutiliza las variables ya obtenidas
+      const reserva = await Reserva.findById(req.params.id);
+      const dispositivos = await Device.find();
+      const usuarios = await require('../models/Usuario').find();
+      return res.render('reserva_edit', {
+        reserva: {
+          ...reserva.toObject(),
+          pesoPaquete,
+          largoPaquete,
+          anchoPaquete,
+          altoPaquete
+        },
+        dispositivos,
+        usuarios,
+        title: 'Editar Reserva',
+        error: errores.join(' ')
+      });
+    }
     // Actualiza la reserva
     await Reserva.findByIdAndUpdate(req.params.id, {
       dispositivoId,
@@ -128,7 +192,11 @@ router.post('/:id', async (req, res) => {
       estado,
       datosContacto: { nombre, numero, email },
       origen,
-      destino
+      destino,
+      pesoPaquete,
+      largoPaquete,
+      anchoPaquete,
+      altoPaquete
     });
     // Si la reserva se completa o cancela, el dispositivo vuelve a estar disponible
     if (estado === 'cancelado' || estado === 'completado') {

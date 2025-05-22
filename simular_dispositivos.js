@@ -31,7 +31,13 @@ async function simularDispositivos(n = 10) {
         camara: randomEstado(),
         motor: randomEstado()
       },
-      ubicacion: randomLatLon()
+      ubicacion: randomLatLon(),
+      capacidad: {
+        pesoMax: tipo === 'robot' ? 20 : 5, // robots: 20kg, drones: 5kg
+        largoMax: tipo === 'robot' ? 100 : 50, // cm
+        anchoMax: tipo === 'robot' ? 80 : 40, // cm
+        altoMax: tipo === 'robot' ? 80 : 40 // cm
+      }
     });
   }
   await Device.insertMany(dispositivos);

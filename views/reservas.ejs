@@ -34,6 +34,7 @@
     <th>Inicio</th>
     <th>Fin</th>
     <th>Tipo Servicio</th>
+    <th>Peso Paquete (kg)</th>
     <th>Estado</th>
     <th>Acciones</th>
   </tr>
@@ -45,6 +46,7 @@
       <td><%= r.fechaInicio ? r.fechaInicio.toLocaleString() : '' %></td>
       <td><%= r.fechaFin ? r.fechaFin.toLocaleString() : '' %></td>
       <td><%= r.tipoServicio %></td>
+      <td><%= typeof r.pesoPaquete !== 'undefined' ? r.pesoPaquete : '-' %></td>
       <td><%= r.estado %></td>
       <td>
         <a href="/reservas/<%= r._id %>/editar">Editar</a>

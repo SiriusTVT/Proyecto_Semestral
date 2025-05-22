@@ -13,6 +13,12 @@ const deviceSchema = new mongoose.Schema({
   ubicacion: {
     lat: Number,
     lon: Number
+  },
+  capacidad: {
+    pesoMax: Number,
+    largoMax: Number,
+    anchoMax: Number,
+    altoMax: Number
   }
 });
 
