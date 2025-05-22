@@ -7,12 +7,10 @@
             <% if (session && session.rol === 'admin') { %>
                 <li><a href="/devices">Dispositivos</a></li>
                 <li><a href="/usuarios">Usuarios</a></li>
-                <li><a href="/services">Servicios</a></li>
                 <li><a href="/bitacora">Bitácora</a></li>
                 <li><a href="/logout">Cerrar sesión</a></li>
             <% } else if (session && session.rol === 'operador') { %>
                 <li><a href="/devices">Dispositivos</a></li>
-                <li><a href="/services">Servicios</a></li>
                 <li><a href="/bitacora">Bitácora</a></li>
                 <li><a href="/logout">Cerrar sesión</a></li>
             <% } else { %>
