@@ -1,32 +1,44 @@
 <h2>Nueva Reserva</h2>
+<% if (typeof error !== 'undefined' && error) { %>
+  <div style="background:#f8d7da;color:#721c24;border:1px solid #f5c6cb;padding:10px;margin-bottom:10px;border-radius:4px;">
+    <strong>No se puede crear la reserva:</strong> <%= error %>
+  </div>
+<% } %>
 <form action="/reservas" method="POST" id="formReserva">
   <label>Dispositivo:</label>
   <select name="dispositivoId" id="dispositivoId" required>
     <% dispositivos.forEach(d => { %>
-      <option value="<%= d._id %>"><%= d.id %> - <%= d.tipo %></option>
+      <option value="<%= d._id %>" <%= typeof dispositivoId !== 'undefined' && dispositivoId == d._id ? 'selected' : '' %>><%= d.id %> - <%= d.tipo %></option>
     <% }) %>
   </select><br>
   <label>Nombre:</label>
-  <input type="text" name="nombre" required><br>
+  <input type="text" name="nombre" value="<%= typeof nombre !== 'undefined' ? nombre : '' %>" required><br>
   <label>Número de contacto:</label>
-  <input type="text" name="numero" required><br>
+  <input type="text" name="numero" value="<%= typeof numero !== 'undefined' ? numero : '' %>" required><br>
   <label>Email:</label>
-  <input type="email" name="email" required><br>
+  <input type="email" name="email" value="<%= typeof email !== 'undefined' ? email : '' %>" required><br>
+  <label>Origen:</label>
+  <input type="text" name="origen" value="<%= typeof origen !== 'undefined' ? origen : '' %>" required><br>
+  <label>Destino:</label>
+  <input type="text" name="destino" value="<%= typeof destino !== 'undefined' ? destino : '' %>" required><br>
   <label>Fecha Inicio:</label>
-  <input type="datetime-local" name="fechaInicio" id="fechaInicio" required><br>
+  <input type="datetime-local" name="fechaInicio" id="fechaInicio" value="<%= typeof fechaInicio !== 'undefined' ? fechaInicio : '' %>" required><br>
   <label>Fecha Fin:</label>
-  <input type="datetime-local" name="fechaFin" id="fechaFin" required><br>
+  <input type="datetime-local" name="fechaFin" id="fechaFin" value="<%= typeof fechaFin !== 'undefined' ? fechaFin : '' %>" required><br>
   <label>Tipo de Servicio:</label>
   <select name="tipoServicio" required>
-    <option value="transporte">Transporte</option>
-    <option value="grabacion">Grabación</option>
+    <option value="transporte" <%= typeof tipoServicio !== 'undefined' && tipoServicio === 'transporte' ? 'selected' : '' %>>Transporte</option>
+    <option value="grabacion" <%= typeof tipoServicio !== 'undefined' && tipoServicio === 'grabacion' ? 'selected' : '' %>>Grabación</option>
   </select><br>
   <button type="submit">Crear Reserva</button>
 </form>
 <a href="/reservas">Volver a reservas</a>
 <script>
 // Validación de solapamiento de fechas en el front-end
-var reservas = <%= JSON.stringify(reservasExistentes || []) %>;
+var reservas = [];
+try {
+  reservas = JSON.parse('<%- JSON.stringify(reservasExistentes || []) %>');
+} catch (e) {}
 document.getElementById('formReserva').addEventListener('submit', function(e) {
   var dispositivoId = document.getElementById('dispositivoId').value;
   var inicio = new Date(document.getElementById('fechaInicio').value);
@@ -40,6 +52,7 @@ document.getElementById('formReserva').addEventListener('submit', function(e) {
   if (solapa) {
     alert('Ya existe una reserva para ese dispositivo en el rango de fechas seleccionado.');
     e.preventDefault();
+    return;
   }
 });
 </script>

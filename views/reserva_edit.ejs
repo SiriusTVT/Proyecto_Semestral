@@ -6,8 +6,16 @@
       <option value="<%= d._id %>" <%= reserva.dispositivoId.equals(d._id) ? 'selected' : '' %>><%= d.id %> - <%= d.tipo %></option>
     <% }) %>
   </select><br>
-  <label>Usuario (ID):</label>
-  <input type="text" name="usuarioId" value="<%= reserva.usuarioId %>" required><br>
+  <label>Nombre:</label>
+  <input type="text" name="nombre" value="<%= reserva.datosContacto ? reserva.datosContacto.nombre : '' %>" required><br>
+  <label>Número de contacto:</label>
+  <input type="text" name="numero" value="<%= reserva.datosContacto ? reserva.datosContacto.numero : '' %>" required><br>
+  <label>Email:</label>
+  <input type="email" name="email" value="<%= reserva.datosContacto ? reserva.datosContacto.email : '' %>" required><br>
+  <label>Origen:</label>
+  <input type="text" name="origen" value="<%= reserva.origen || '' %>" required><br>
+  <label>Destino:</label>
+  <input type="text" name="destino" value="<%= reserva.destino || '' %>" required><br>
   <label>Fecha Inicio:</label>
   <input type="datetime-local" name="fechaInicio" value="<%= reserva.fechaInicio ? reserva.fechaInicio.toISOString().slice(0,16) : '' %>" required><br>
   <label>Fecha Fin:</label>

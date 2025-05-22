@@ -40,7 +40,7 @@ router.get('/nueva', async (req, res) => {
 
 // POST /reservas → Crear reserva
 router.post('/', async (req, res) => {
-  const { dispositivoId, fechaInicio, fechaFin, tipoServicio, nombre, numero, email } = req.body;
+  const { dispositivoId, fechaInicio, fechaFin, tipoServicio, nombre, numero, email, origen, destino } = req.body;
   try {
     // Validación de fechas
     if (!fechaInicio || !fechaFin || new Date(fechaFin) <= new Date(fechaInicio)) {
@@ -57,8 +57,38 @@ router.post('/', async (req, res) => {
     if (solapada) {
       return res.status(400).send('El dispositivo ya tiene una reserva activa en ese rango de fechas');
     }
+    // Verificar estado del dispositivo antes de crear la reserva
+    const dispositivo = await Device.findById(dispositivoId);
+    let errores = [];
+    if (!dispositivo) {
+      errores.push('Dispositivo no encontrado.');
+    } else {
+      if (dispositivo.bateria < 30) errores.push('Nivel de batería insuficiente (< 30%).');
+      if (!dispositivo.sensores || !dispositivo.sensores.gps) errores.push('GPS no disponible.');
+      if (!dispositivo.sensores || !dispositivo.sensores.camara) errores.push('Cámara no disponible.');
+      if (!dispositivo.sensores || !dispositivo.sensores.motor) errores.push('Motor no disponible.');
+      if (dispositivo.estado !== 'disponible') errores.push('El dispositivo no está disponible.');
+    }
+    if (errores.length > 0) {
+      // Reutiliza las variables ya obtenidas en el GET /nueva
+      return res.render('reserva_add', {
+        dispositivos: await Device.find(),
+        reservasExistentes: await Reserva.find({ estado: { $in: ['activo', 'completado'] } }),
+        title: 'Nueva Reserva',
+        error: errores.join(' '),
+        nombre,
+        numero,
+        email,
+        origen,
+        destino,
+        fechaInicio,
+        fechaFin,
+        tipoServicio,
+        dispositivoId
+      });
+    }
     // Guardar los datos del usuario no autenticado en la reserva
-    const reserva = await Reserva.create({ dispositivoId, fechaInicio, fechaFin, tipoServicio, datosContacto: { nombre, numero, email } });
+    const reserva = await Reserva.create({ dispositivoId, fechaInicio, fechaFin, tipoServicio, datosContacto: { nombre, numero, email }, origen, destino });
     // Cambia el estado del dispositivo a "en servicio"
     await Device.findByIdAndUpdate(dispositivoId, { estado: 'en servicio' });
     // Registrar en bitácora
@@ -86,9 +116,25 @@ router.get('/:id/editar', async (req, res) => {
 
 // POST /reservas/:id → Actualizar reserva
 router.post('/:id', async (req, res) => {
-  const { dispositivoId, fechaInicio, fechaFin, tipoServicio, usuarioId, estado } = req.body;
+  const { dispositivoId, fechaInicio, fechaFin, tipoServicio, estado, nombre, numero, email, origen, destino } = req.body;
   try {
-    await Reserva.findByIdAndUpdate(req.params.id, { dispositivoId, usuarioId, fechaInicio, fechaFin, tipoServicio, estado });
+    // Actualiza la reserva
+    await Reserva.findByIdAndUpdate(req.params.id, {
+      dispositivoId,
+      fechaInicio,
+      fechaFin,
+      tipoServicio,
+      estado,
+      datosContacto: { nombre, numero, email },
+      origen,
+      destino
+    });
+    // Si la reserva se completa o cancela, el dispositivo vuelve a estar disponible
+    if (estado === 'cancelado' || estado === 'completado') {
+      await Device.findByIdAndUpdate(dispositivoId, { estado: 'disponible' });
+    } else if (estado === 'activo') {
+      await Device.findByIdAndUpdate(dispositivoId, { estado: 'en servicio' });
+    }
     res.redirect('/reservas');
   } catch (err) {
     res.status(400).send('Error actualizando reserva');
@@ -98,7 +144,10 @@ router.post('/:id', async (req, res) => {
 // POST /reservas/:id/cancelar → Cancelar reserva
 router.post('/:id/cancelar', async (req, res) => {
   try {
-    await Reserva.findByIdAndUpdate(req.params.id, { estado: 'cancelado' });
+    const reserva = await Reserva.findByIdAndUpdate(req.params.id, { estado: 'cancelado' }, { new: true });
+    if (reserva && reserva.dispositivoId) {
+      await Device.findByIdAndUpdate(reserva.dispositivoId, { estado: 'disponible' });
+    }
     res.redirect('/reservas');
   } catch (err) {
     res.status(400).send('Error cancelando reserva');

@@ -41,7 +41,7 @@
     <tr>
       <td><%= r._id %></td>
       <td><%= r.dispositivoId && r.dispositivoId.id ? r.dispositivoId.id : '' %></td>
-      <td><%= r.usuarioId || '-' %></td>
+      <td><%= r.datosContacto && r.datosContacto.nombre ? r.datosContacto.nombre : '-' %></td>
       <td><%= r.fechaInicio ? r.fechaInicio.toLocaleString() : '' %></td>
       <td><%= r.fechaFin ? r.fechaFin.toLocaleString() : '' %></td>
       <td><%= r.tipoServicio %></td>
