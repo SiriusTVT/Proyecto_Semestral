@@ -1,0 +1,20 @@
+<h2>Bitácora de Servicios</h2>
+<table border="1">
+  <tr>
+    <th>Fecha</th>
+    <th>Dispositivo</th>
+    <th>Duración (min)</th>
+    <th>Estado</th>
+    <th>Reserva</th>
+  </tr>
+  <% bitacoras.forEach(b => { %>
+    <tr>
+      <td><%= b.fecha ? new Date(b.fecha).toLocaleString() : '' %></td>
+      <td><%= b.dispositivo && b.dispositivo.id ? b.dispositivo.id : '' %></td>
+      <td><%= b.duracion %></td>
+      <td><%= b.estado %></td>
+      <td><%= b.reserva ? b.reserva._id : '' %></td>
+    </tr>
+  <% }) %>
+</table>
+<a href="/">Volver al inicio</a>

@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Reserva = require('../models/Reserva');
 const Device = require('../models/Device');
+const Bitacora = require('../models/Bitacora');
 
 // GET /reservas → Lista todas las reservas
 router.get('/', async (req, res) => {
@@ -9,7 +10,10 @@ router.get('/', async (req, res) => {
   const { dispositivoId, usuarioId, estado } = req.query;
   if (dispositivoId) filtro.dispositivoId = dispositivoId;
   if (usuarioId) filtro.usuarioId = usuarioId;
-  if (estado) filtro.estado = estado;
+  // Si el filtro de estado está presente, mostrar todos los estados (incluido cancelado)
+  if (typeof estado !== 'undefined' && estado !== '') filtro.estado = estado;
+  // Si no hay filtro de estado, ocultar cancelados
+  else filtro.estado = { $ne: 'cancelado' };
   const reservas = await Reserva.find(filtro).populate('dispositivoId');
   const dispositivos = await Device.find();
   const usuarios = await require('../models/Usuario').find();
@@ -26,8 +30,14 @@ router.get('/', async (req, res) => {
 
 // GET /reservas/nueva → Formulario para nueva reserva
 router.get('/nueva', async (req, res) => {
-  const dispositivos = await Device.find({ estado: 'disponible' });
-  res.render('reserva_add', { dispositivos, title: 'Nueva Reserva' });
+  // Mostrar todos los dispositivos, no solo los disponibles
+  const dispositivos = await Device.find();
+  const usuarios = await require('../models/Usuario').find();
+  // Traer reservas activas para validación front-end
+  const reservasExistentes = await require('../models/Reserva').find({
+    estado: { $in: ['activo', 'completado'] }
+  });
+  res.render('reserva_add', { dispositivos, usuarios, reservasExistentes, title: 'Nueva Reserva' });
 });
 
 // POST /reservas → Crear reserva
@@ -50,9 +60,18 @@ router.post('/', async (req, res) => {
       return res.status(400).send('El dispositivo ya tiene una reserva activa en ese rango de fechas');
     }
     // (Opcional) Validar penalidades de usuario aquí
-    await Reserva.create({ dispositivoId, usuarioId, fechaInicio, fechaFin, tipoServicio });
+    const reserva = await Reserva.create({ dispositivoId, usuarioId, fechaInicio, fechaFin, tipoServicio });
     // Cambia el estado del dispositivo a "en servicio"
     await Device.findByIdAndUpdate(dispositivoId, { estado: 'en servicio' });
+    // Registrar en bitácora
+    const duracion = Math.round((new Date(fechaFin) - new Date(fechaInicio)) / 60000); // minutos
+    await Bitacora.create({
+      fecha: fechaInicio,
+      dispositivo: dispositivoId,
+      duracion,
+      estado: 'pendiente',
+      reserva: reserva._id
+    });
     res.redirect('/reservas');
   } catch (err) {
     res.status(400).send('Error creando reserva');

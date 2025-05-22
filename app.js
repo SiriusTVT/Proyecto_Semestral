@@ -5,6 +5,7 @@ const expressLayouts = require('express-ejs-layouts');
 const deviceRoutes = require('./routes/devices');
 const reservasRoutes = require('./routes/reservas');
 const usuariosRoutes = require('./routes/usuarios');
+const bitacoraRoutes = require('./routes/bitacora');
 const mongoose = require('mongoose');
 const Device = require('./models/Device'); // Asegúrate de que la ruta sea correcta
 
@@ -24,6 +25,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/devices', deviceRoutes);
 app.use('/reservas', reservasRoutes);
 app.use('/usuarios', usuariosRoutes);
+app.use('/bitacora', bitacoraRoutes);
 
 // Rutas
 app.get('/', async (req, res) => {
