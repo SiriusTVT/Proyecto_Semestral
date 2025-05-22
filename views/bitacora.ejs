@@ -6,6 +6,8 @@
     <th>Duración (min)</th>
     <th>Estado</th>
     <th>Reserva</th>
+    <th>Peso Paquete (kg)</th>
+    <th>Dimensiones (cm)</th>
     <th>QR Entrega</th>
   </tr>
   <% bitacoras.forEach(b => { %>
@@ -15,6 +17,14 @@
       <td><%= b.duracion %></td>
       <td><%= b.estado %></td>
       <td><%= b.reserva ? b.reserva._id : '' %></td>
+      <td><%= b.reserva && typeof b.reserva.pesoPaquete !== 'undefined' ? b.reserva.pesoPaquete : '-' %></td>
+      <td>
+        <% if(b.reserva) { %>
+          <%= b.reserva.largoPaquete || '-' %> x <%= b.reserva.anchoPaquete || '-' %> x <%= b.reserva.altoPaquete || '-' %>
+        <% } else { %>
+          -
+        <% } %>
+      </td>
       <td>
         <% if(b.estado !== 'finalizado'){ %>
           <a href="/qr/<%= b._id %>/qr">Ver QR</a>

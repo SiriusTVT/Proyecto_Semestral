@@ -110,7 +110,11 @@ router.post('/', async (req, res) => {
       dispositivo: dispositivoId,
       duracion,
       estado: 'pendiente',
-      reserva: reserva._id
+      reserva: reserva._id,
+      pesoPaquete,
+      largoPaquete,
+      anchoPaquete,
+      altoPaquete
     });
     res.redirect('/reservas');
   } catch (err) {
