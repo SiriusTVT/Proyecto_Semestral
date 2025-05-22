@@ -6,6 +6,7 @@
     <th>Duración (min)</th>
     <th>Estado</th>
     <th>Reserva</th>
+    <th>QR Entrega</th>
   </tr>
   <% bitacoras.forEach(b => { %>
     <tr>
@@ -14,6 +15,13 @@
       <td><%= b.duracion %></td>
       <td><%= b.estado %></td>
       <td><%= b.reserva ? b.reserva._id : '' %></td>
+      <td>
+        <% if(b.estado !== 'finalizado'){ %>
+          <a href="/qr/<%= b._id %>/qr">Ver QR</a>
+        <% } else { %>
+          Entregado
+        <% } %>
+      </td>
     </tr>
   <% }) %>
 </table>

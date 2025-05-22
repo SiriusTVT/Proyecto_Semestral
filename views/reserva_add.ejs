@@ -6,12 +6,12 @@
       <option value="<%= d._id %>"><%= d.id %> - <%= d.tipo %></option>
     <% }) %>
   </select><br>
-  <label>Usuario:</label>
-  <select name="usuarioId" required>
-    <% usuarios.forEach(u => { %>
-      <option value="<%= u._id %>"><%= u.nombre %></option>
-    <% }) %>
-  </select><br>
+  <label>Nombre:</label>
+  <input type="text" name="nombre" required><br>
+  <label>Número de contacto:</label>
+  <input type="text" name="numero" required><br>
+  <label>Email:</label>
+  <input type="email" name="email" required><br>
   <label>Fecha Inicio:</label>
   <input type="datetime-local" name="fechaInicio" id="fechaInicio" required><br>
   <label>Fecha Fin:</label>

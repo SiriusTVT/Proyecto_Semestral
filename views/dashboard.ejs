@@ -1,5 +1,7 @@
 <h1>Panel de Monitoreo</h1>
-<a href="/devices/add">Agregar Dispositivo</a>
+<% if (session && (session.rol === 'admin' || session.rol === 'operador')) { %>
+  <a href="/devices/add">Agregar Dispositivo</a>
+<% } %>
 <table border="1">
   <tr>
     <th>ID</th>
@@ -7,7 +9,9 @@
     <th>Batería</th>
     <th>Estado</th>
     <th>Ubicación</th>
-    <th>Acciones</th>
+    <% if (session && (session.rol === 'admin' || session.rol === 'operador')) { %>
+      <th>Acciones</th>
+    <% } %>
   </tr>
   <% dispositivos.forEach(d => { %>
     <tr>
@@ -16,7 +20,9 @@
       <td><%= d.bateria %>%</td>
       <td><%= d.estado %></td>
       <td><%= d.ubicacion.lat %>, <%= d.ubicacion.lon %></td>
-      <td><a href="/devices/delete/<%= d.id %>" onclick="return confirm('¿Eliminar este dispositivo?')">Eliminar</a></td>
+      <% if (session && (session.rol === 'admin' || session.rol === 'operador')) { %>
+        <td><a href="/devices/delete/<%= d.id %>" onclick="return confirm('¿Eliminar este dispositivo?')">Eliminar</a></td>
+      <% } %>
     </tr>
   <% }) %>
 </table>

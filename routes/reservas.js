@@ -30,19 +30,17 @@ router.get('/', async (req, res) => {
 
 // GET /reservas/nueva → Formulario para nueva reserva
 router.get('/nueva', async (req, res) => {
-  // Mostrar todos los dispositivos, no solo los disponibles
   const dispositivos = await Device.find();
-  const usuarios = await require('../models/Usuario').find();
-  // Traer reservas activas para validación front-end
+  // No se cargan usuarios, solo dispositivos y reservas existentes
   const reservasExistentes = await require('../models/Reserva').find({
     estado: { $in: ['activo', 'completado'] }
   });
-  res.render('reserva_add', { dispositivos, usuarios, reservasExistentes, title: 'Nueva Reserva' });
+  res.render('reserva_add', { dispositivos, reservasExistentes, title: 'Nueva Reserva' });
 });
 
 // POST /reservas → Crear reserva
 router.post('/', async (req, res) => {
-  const { dispositivoId, fechaInicio, fechaFin, tipoServicio, usuarioId } = req.body;
+  const { dispositivoId, fechaInicio, fechaFin, tipoServicio, nombre, numero, email } = req.body;
   try {
     // Validación de fechas
     if (!fechaInicio || !fechaFin || new Date(fechaFin) <= new Date(fechaInicio)) {
@@ -59,8 +57,8 @@ router.post('/', async (req, res) => {
     if (solapada) {
       return res.status(400).send('El dispositivo ya tiene una reserva activa en ese rango de fechas');
     }
-    // (Opcional) Validar penalidades de usuario aquí
-    const reserva = await Reserva.create({ dispositivoId, usuarioId, fechaInicio, fechaFin, tipoServicio });
+    // Guardar los datos del usuario no autenticado en la reserva
+    const reserva = await Reserva.create({ dispositivoId, fechaInicio, fechaFin, tipoServicio, datosContacto: { nombre, numero, email } });
     // Cambia el estado del dispositivo a "en servicio"
     await Device.findByIdAndUpdate(dispositivoId, { estado: 'en servicio' });
     // Registrar en bitácora
@@ -82,7 +80,8 @@ router.post('/', async (req, res) => {
 router.get('/:id/editar', async (req, res) => {
   const reserva = await Reserva.findById(req.params.id);
   const dispositivos = await Device.find();
-  res.render('reserva_edit', { reserva, dispositivos, title: 'Editar Reserva' });
+  const usuarios = await require('../models/Usuario').find();
+  res.render('reserva_edit', { reserva, dispositivos, usuarios, title: 'Editar Reserva' });
 });
 
 // POST /reservas/:id → Actualizar reserva

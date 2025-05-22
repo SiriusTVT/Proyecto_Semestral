@@ -1,0 +1,7 @@
+<h2>Entrega de Servicio</h2>
+<p>Escanea este código QR para marcar el servicio como entregado:</p>
+<img src="<%= qr %>" alt="QR Entrega">
+<form action="/qr/<%= bitacora._id %>/entregar" method="POST">
+  <button type="submit">Marcar como Entregado</button>
+</form>
+<a href="/bitacora">Volver a Bitácora</a>

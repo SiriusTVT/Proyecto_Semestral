@@ -1,5 +1,7 @@
 <h2>Usuarios</h2>
-<a href="/usuarios/nuevo">Crear Usuario</a>
+<% if (session && (session.rol === 'admin' || session.rol === 'operador')) { %>
+  <a href="/usuarios/nuevo">Crear Usuario</a>
+<% } %>
 <br><br>
 <table border="1">
   <tr>

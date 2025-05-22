@@ -2,13 +2,21 @@ const express = require('express');
 const router = express.Router();
 const Usuario = require('../models/Usuario');
 
+// Middleware para proteger rutas según rol
+function requireRole(roles) {
+  return (req, res, next) => {
+    if (req.session && roles.includes(req.session.rol)) return next();
+    res.status(403).send('Acceso denegado');
+  };
+}
+
 // Formulario para crear usuario
-router.get('/nuevo', (req, res) => {
+router.get('/nuevo', requireRole(['admin']), (req, res) => {
   res.render('usuario_add', { title: 'Crear Usuario' });
 });
 
 // Crear usuario (POST)
-router.post('/', async (req, res) => {
+router.post('/', requireRole(['admin']), async (req, res) => {
   const { nombre, email, rol } = req.body;
   try {
     await Usuario.create({ nombre, email, rol });
@@ -19,7 +27,7 @@ router.post('/', async (req, res) => {
 });
 
 // Listar usuarios
-router.get('/', async (req, res) => {
+router.get('/', requireRole(['admin', 'operador']), async (req, res) => {
   const usuarios = await Usuario.find();
   res.render('usuarios', { usuarios, title: 'Usuarios' });
 });
