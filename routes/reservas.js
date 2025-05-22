@@ -67,7 +67,8 @@ router.post('/', async (req, res) => {
       if (!dispositivo.sensores || !dispositivo.sensores.gps) errores.push('GPS no disponible.');
       if (!dispositivo.sensores || !dispositivo.sensores.camara) errores.push('Cámara no disponible.');
       if (!dispositivo.sensores || !dispositivo.sensores.motor) errores.push('Motor no disponible.');
-      if (dispositivo.estado !== 'disponible') errores.push('El dispositivo no está disponible.');
+      // Solo bloquear si está en mantenimiento
+      if (dispositivo.estado === 'mantenimiento') errores.push('El dispositivo está en mantenimiento.');
     }
     if (errores.length > 0) {
       // Reutiliza las variables ya obtenidas en el GET /nueva
